@@ -1,0 +1,14 @@
+{
+  "name": "ping2mqtt",
+  "version": "1.0.0",
+  "description": "Ping and command line to MQTT",
+  "main": "ping2mqtt.js",
+  "scripts": {
+    "start": "node ping2mqtt.js"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "mqtt": "4.3.7"
+  },
+  "author": "alexarch21"
+}

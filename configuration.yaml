@@ -1,0 +1,26 @@
+
+mqtt:
+  server: 'mqtt://192.168.5.100'
+  base_topic: 'ping'
+
+ping:
+
+  - name: google
+    host: www.google.com
+    scan_interval: 300
+
+  - name: localhost
+    host: 127.0.0.1
+    scan_interval: 10
+
+  - name: failhost
+    host: 192.168.100.100
+    scan_interval: 20
+
+command_line:
+
+  - name: test_cmdline
+    command: 'nc -z -w 3 192.168.5.164 80'
+    scan_interval: 120
+    timeout: 5
+    result_on: 0
