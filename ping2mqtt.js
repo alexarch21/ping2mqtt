@@ -70,7 +70,9 @@ function readConfig()
         logerror('MQTT', `MQTT server is undefined !`);
     }
 
-    const start_t = process.hrtime();
+    const c_t = process.hrtime();
+
+    let start_t = config.run_on_start?.ping ? [0, 0] : c_t;
 
     if( config.ping ) {
         for( let m of config.ping ) {
@@ -78,6 +80,8 @@ function readConfig()
             loginfo('PING', `Added host ${m.name}`);
         }
     }
+
+    start_t = config.run_on_start?.command_line ? [0, 0] : c_t;
 
     if( config.command_line ) {
         for( let m of config.command_line ) {
@@ -130,7 +134,13 @@ function timerLoop()
 
 function main()
 {
-    console.log(KBLU + '### Ping 2 MQTT V1.0 ###' + KNRM);
+    console.log(KBLU + '### Ping 2 MQTT V1.1 ###' + KNRM);
+
+    // Catch CTRL-C
+    process.on('SIGINT', function(){
+        logwarn('SYSR', `SIGINT detected, quitting`);
+        process.exit(0);
+    });
 
     // Read config
     config = readConfig();
