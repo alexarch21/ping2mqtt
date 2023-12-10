@@ -77,7 +77,7 @@ function readConfig()
     if( config.ping ) {
         for( let m of config.ping ) {
             pings.push({'time': start_t, ...m});
-            loginfo('PING', `Added host ${m.name}`);
+            loginfo('PING', `Added ping ${m.name}`);
         }
     }
 
@@ -105,10 +105,8 @@ function timerLoop()
     for( i of pings ) {
         if( t[0] - i.time[0] >= i.scan_interval ) {
             i.time = t;
-            loginfo('PING', `Pinging ${i.name} (${i.host})`);
+            //loginfo('PING', `Pinging ${i.name} (${i.host})`);
             const res = child_process.spawnSync('ping', ['-c', '1', '-W', '5', i.host], { });
-            if( res.status !== 0 ) 
-                logwarn('PING', `Ping failed for ${i.host}`);
             client.publish(`${config.mqtt.base_topic}/${i.name}/state`, (res.status === 0) ? 'on' : 'off');
         }
     }
@@ -116,12 +114,14 @@ function timerLoop()
     for( i of cmdlines ) {
         if( t[0] - i.time[0] >= i.scan_interval ) {
             i.time = t;
-            loginfo('CMDL', `Running ${i.name}`);
+            //loginfo('CMDL', `Running ${i.name}`);
             const res = child_process.spawnSync(i.command, [], { shell: true, timeout: (i.timeout ?? 10) * 1000 });
-            const status = ( res.status === (i.result_on ?? 0) );
-            if( !status ) 
-                logwarn('CMDL', `Command failed for ${i.name}`);
-            client.publish(`${config.mqtt.base_topic}/${i.name}/state`, status ? 'on' : 'off');
+            if( res.status !== 127 ) {
+                const status = ( res.status === (i.result_on ?? 0) );
+                client.publish(`${config.mqtt.base_topic}/${i.name}/state`, status ? 'on' : 'off');
+            } else {
+                logwarn('CMDL', `Command not found for ${i.name}`);
+            }
         }
     }
 
