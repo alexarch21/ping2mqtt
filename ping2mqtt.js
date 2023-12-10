@@ -115,10 +115,14 @@ function timerLoop()
         if( t[0] - i.time[0] >= i.scan_interval ) {
             i.time = t;
             //loginfo('CMDL', `Running ${i.name}`);
-            const res = child_process.spawnSync(i.command, [], { shell: true, timeout: (i.timeout ?? 10) * 1000 });
+            const res = child_process.spawnSync(i.command, [], { shell: true, encoding: 'utf-8', timeout: (i.timeout ?? 10) * 1000 });
             if( res.status !== 127 ) {
-                const status = ( res.status === (i.result_on ?? 0) );
-                client.publish(`${config.mqtt.base_topic}/${i.name}/state`, status ? 'on' : 'off');
+                if( i.result === undefined || i.result === 'exitcode' ) {
+                    const status = ( res.status === (i.result_on ?? 0) );
+                    client.publish(`${config.mqtt.base_topic}/${i.name}/state`, status ? 'on' : 'off');
+                } else if( i.result === 'stdout' ) {
+                    client.publish(`${config.mqtt.base_topic}/${i.name}/state`, res.stdout);
+                }
             } else {
                 logwarn('CMDL', `Command not found for ${i.name}`);
             }
