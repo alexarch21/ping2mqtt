@@ -3,6 +3,10 @@ mqtt:
   server: 'mqtt://192.168.5.100'
   base_topic: 'ping'
 
+run_on_start:
+  ping: true                # Set to true to run all pings at app start, otherwise set false
+  command_line: true        # Set to true to run all command line sensors at app start, otherwise false
+
 ping:
 
   - name: google
@@ -19,8 +23,16 @@ ping:
 
 command_line:
 
+  # Example of a binary sensor, returns 'on' or 'off' depending on the process exit code
   - name: test_cmdline
     command: 'nc -z -w 3 192.168.5.164 80'
     scan_interval: 120
-    timeout: 5
-    result_on: 0
+    timeout: 5          # Timeout of the process is set to 5 seconds
+    result_on: 0        # 'on' is sent if the exit code is 0
+
+  # Example of a string sensor, return the stdout output of the command
+  - name: cpu_temperature
+    command: 'cat /sys/class/thermal/thermal_zone0/temp'
+    scan_interval: 120
+    result: stdout
+
